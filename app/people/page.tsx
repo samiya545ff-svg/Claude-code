@@ -5,6 +5,7 @@ import PageHead from "@/components/PageHead";
 import Avatar from "@/components/Avatar";
 import Icon from "@/components/Icon";
 import Modal from "@/components/Modal";
+import ConfirmButton from "@/components/ConfirmButton";
 import { Person, useStore } from "@/lib/store";
 
 const STATUSES: Person["status"][] = ["Active", "Remote", "On leave"];
@@ -15,6 +16,7 @@ export default function PeoplePage() {
   const [q, setQ] = useState("");
   const [dept, setDept] = useState("All");
   const [editing, setEditing] = useState<(Omit<Person, "id"> & { id?: string }) | null>(null);
+  const [photoError, setPhotoError] = useState("");
 
   const depts = ["All", ...Array.from(new Set(state.people.map((p) => p.dept)))];
   const list = state.people.filter(
@@ -36,7 +38,8 @@ export default function PeoplePage() {
 
   const onPhoto = (file?: File) => {
     if (!file || !editing) return;
-    if (file.size > 400_000) return alert("Please choose an image under 400 KB");
+    if (file.size > 400_000) return setPhotoError("Choose an image under 400 KB.");
+    setPhotoError("");
     const r = new FileReader();
     r.onload = () => setEditing({ ...editing, avatar: String(r.result) });
     r.readAsDataURL(file);
@@ -91,12 +94,13 @@ export default function PeoplePage() {
                   <button className="link-btn" onClick={() => setEditing(p)}>
                     Edit
                   </button>
-                  <button
+                  <ConfirmButton
                     className="link-btn danger"
-                    onClick={() => confirm(`Remove ${p.name}?`) && update((s) => ({ ...s, people: s.people.filter((x) => x.id !== p.id) }))}
+                    confirmText="Confirm remove"
+                    onConfirm={() => update((s) => ({ ...s, people: s.people.filter((x) => x.id !== p.id) }))}
                   >
                     Remove
-                  </button>
+                  </ConfirmButton>
                 </td>
               </tr>
             ))}
@@ -126,6 +130,7 @@ export default function PeoplePage() {
                 </button>
               )}
             </div>
+            {photoError && <p className="form-error">{photoError}</p>}
             <label>
               Name
               <input required autoFocus value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} />

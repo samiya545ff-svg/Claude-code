@@ -26,6 +26,7 @@ export default function WeekCalendar({ from = 8, to = 12, days = 6, rowHeight = 
   const { state, update, uid } = useStore();
   const [anchor, setAnchor] = useState(() => new Date());
   const [editing, setEditing] = useState<Partial<CalEvent> | null>(null);
+  const [error, setError] = useState("");
 
   const mon = startOfWeek(anchor);
   const cols = Array.from({ length: days }, (_, i) => {
@@ -60,7 +61,8 @@ export default function WeekCalendar({ from = 8, to = 12, days = 6, rowHeight = 
   const save = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing?.title?.trim() || !editing.date || editing.start == null || editing.end == null) return;
-    if (editing.end <= editing.start) return alert("End time must be after start time");
+    if (editing.end <= editing.start) return setError("End time must be after the start time.");
+    setError("");
     const ev: CalEvent = {
       id: editing.id ?? uid(),
       title: editing.title.trim(),
@@ -157,7 +159,7 @@ export default function WeekCalendar({ from = 8, to = 12, days = 6, rowHeight = 
       </div>
 
       {editing && (
-        <Modal title={editing.id ? "Edit event" : "New event"} onClose={() => setEditing(null)}>
+        <Modal title={editing.id ? "Edit event" : "New event"} onClose={() => { setEditing(null); setError(""); }}>
           <form onSubmit={save} className="form">
             <label>
               Title
@@ -206,6 +208,7 @@ export default function WeekCalendar({ from = 8, to = 12, days = 6, rowHeight = 
                 }
               />
             </label>
+            {error && <p className="form-error">{error}</p>}
             <div className="form-actions">
               {editing.id && (
                 <button

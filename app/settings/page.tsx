@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import PageHead from "@/components/PageHead";
+import ConfirmButton from "@/components/ConfirmButton";
 import { useStore } from "@/lib/store";
 
 export default function SettingsPage() {
@@ -15,9 +16,8 @@ export default function SettingsPage() {
       setForm(state.user);
       setProjects(state.projects);
     }
-    // only sync once data has loaded from storage
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated]);
+    // re-sync when the stored profile changes (load, save or reset)
+  }, [hydrated, state.user, state.projects]);
 
   const save = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,9 +56,9 @@ export default function SettingsPage() {
         </label>
         <div className="form-actions">
           {saved && <span className="saved">Saved ✓</span>}
-          <button type="button" className="btn ghost danger" onClick={() => confirm("Reset all data?") && reset()}>
+          <ConfirmButton className="btn ghost danger" confirmText="Click again to reset" onConfirm={reset}>
             Reset demo data
-          </button>
+          </ConfirmButton>
           <button className="btn">Save changes</button>
         </div>
       </form>

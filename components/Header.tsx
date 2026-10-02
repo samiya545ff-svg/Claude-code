@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Icon from "./Icon";
+import ConfirmButton from "./ConfirmButton";
 import { useStore } from "@/lib/store";
 
 const NAV = [
@@ -111,15 +112,16 @@ export default function Header() {
               <button className="menu-item" onClick={() => router.push("/settings")}>
                 Profile & settings
               </button>
-              <button
+              <ConfirmButton
                 className="menu-item"
-                onClick={() => {
-                  if (confirm("Reset all dashboard data to defaults?")) reset();
+                confirmText="Click again to reset all data"
+                onConfirm={() => {
+                  reset();
                   setOpen(null);
                 }}
               >
                 Reset demo data
-              </button>
+              </ConfirmButton>
             </div>
           )}
         </div>

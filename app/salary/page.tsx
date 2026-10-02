@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import PageHead from "@/components/PageHead";
 import Avatar from "@/components/Avatar";
 import { useStore } from "@/lib/store";
@@ -9,6 +10,7 @@ export default function SalaryPage() {
   const total = state.people.reduce((a, p) => a + p.salary, 0);
   const max = Math.max(1, ...state.people.map((p) => p.salary));
 
+  const [copied, setCopied] = useState(false);
   const exportCsv = () => {
     const rows = [["Name", "Role", "Department", "Monthly", "Annual"], ...state.people.map((p) => [p.name, p.role, p.dept, p.salary, p.salary * 12])];
     const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
@@ -17,13 +19,21 @@ export default function SalaryPage() {
     a.download = "salaries.csv";
     a.click();
     URL.revokeObjectURL(a.href);
+    // Downloads can be blocked in embedded viewers, so also copy the CSV.
+    navigator.clipboard
+      ?.writeText(csv)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {});
   };
 
   return (
     <>
       <PageHead title="Salary" sub="Edit monthly salaries inline.">
         <button className="btn ghost" onClick={exportCsv}>
-          Export CSV
+          {copied ? "CSV copied ✓" : "Export CSV"}
         </button>
       </PageHead>
       <div className="summary">
